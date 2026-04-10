@@ -1,0 +1,33 @@
+{
+  "name": "@rajdeepratan/claude-setup-kit",
+  "version": "1.0.0",
+  "description": "Install Claude Code setup guides and the /setup-claude command for any repo",
+  "bin": {
+    "claude-setup-kit": "./bin/install.js"
+  },
+  "files": [
+    "bin/",
+    "templates/"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "ai",
+    "setup",
+    "agents",
+    "developer-tools"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rajdeepratan/claude-setup-kit"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  }
+}
