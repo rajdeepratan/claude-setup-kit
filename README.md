@@ -19,12 +19,12 @@ Installs two slash commands and a collection of guide files that teach Claude ho
 
 **One-time run (recommended):**
 ```bash
-npx @rajdeepratan/claude-setup-kit
+npx claude-setup-kit
 ```
 
 **Or install globally:**
 ```bash
-npm install -g @rajdeepratan/claude-setup-kit
+npm install -g claude-setup-kit
 claude-setup-kit
 ```
 
@@ -91,6 +91,6 @@ The loop runs hands-off except for the three gates: plan confirmation, branch de
 Re-run the install command to update your guide files to the latest version:
 
 ```bash
-npx @rajdeepratan/claude-setup-kit
+npx claude-setup-kit
 # → "claude-setup-kit is already installed. Update to the latest version? (y/n)"
 ```

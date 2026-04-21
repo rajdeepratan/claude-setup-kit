@@ -1,4 +1,4 @@
-name: Publish to npm and GitHub Packages
+name: Publish to npm
 
 on:
   release:
@@ -25,25 +25,3 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  publish-gpr:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-
-      - name: Set version from release tag
-        run: npm version ${GITHUB_REF_NAME#v} --no-git-tag-version
-
-      - name: Publish to GitHub Packages
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
