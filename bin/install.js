@@ -45,15 +45,22 @@ async function main() {
     fs.copyFileSync(path.join(TEMPLATES_DIR, file), path.join(INSTALL_DIR, file));
   }
 
-  // Generate setup-claude.md with the correct absolute paths for this machine
-  const template = fs.readFileSync(path.join(TEMPLATES_DIR, 'setup-claude.md'), 'utf8');
+  // Generate command files with the correct absolute paths for this machine
   const installPath = INSTALL_DIR.split(path.sep).join('/'); // normalize to forward slashes
-  const generated = template.replace(/\{\{INSTALL_PATH\}\}/g, installPath);
-  fs.writeFileSync(path.join(COMMANDS_DIR, 'setup-claude.md'), generated);
+  const COMMAND_FILES = ['setup-claude.md', 'code.md'];
+  for (const cmd of COMMAND_FILES) {
+    const template = fs.readFileSync(path.join(TEMPLATES_DIR, cmd), 'utf8');
+    const generated = template.replace(/\{\{INSTALL_PATH\}\}/g, installPath);
+    fs.writeFileSync(path.join(COMMANDS_DIR, cmd), generated);
+  }
 
   console.log(`\n✓ Guide files installed to: ${INSTALL_DIR}`);
-  console.log(`✓ Command installed to: ${path.join(COMMANDS_DIR, 'setup-claude.md')}`);
-  console.log('\nDone! Open Claude Code in any repo and run /setup-claude to get started.');
+  for (const cmd of COMMAND_FILES) {
+    console.log(`✓ Command installed to: ${path.join(COMMANDS_DIR, cmd)}`);
+  }
+  console.log('\nDone! Open Claude Code in any repo:');
+  console.log('  • /setup-claude — one-time repo setup');
+  console.log('  • /code — run the end-to-end development workflow');
   rl.close();
 }
 
