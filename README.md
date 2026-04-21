@@ -1,6 +1,6 @@
 # claude-setup-kit
 
-Install Claude Code setup guides and the `/setup-claude` command on any machine — so you can set up Claude properly in any repo with a single command.
+Install two slash commands for Claude Code — `/setup-claude` to scaffold any repo and `/code` to run a skill-driven, nine-phase development workflow end-to-end.
 
 ---
 
@@ -42,7 +42,7 @@ Running it again on a machine that already has it installed will prompt you to u
 
 The guide files cover:
 - **Instructions** — golden rules, creation order, file structure, verification
-- **Workflow** — end-to-end ticket-to-PR flow (branch → implement → review → push)
+- **Workflow** — the nine-phase `/code` loop (plan → confirm → branch → implement → verify → review → push+PR → PR feedback), with superpowers skills at each phase
 - **Rules** — how to create rule files for a repo
 - **Skills** — how to create skill files for a repo
 - **Agents** — how to create agent files, mandatory checklists, monorepo structure

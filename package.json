@@ -1,7 +1,7 @@
 {
   "name": "@rajdeepratan/claude-setup-kit",
   "version": "1.0.0",
-  "description": "Install Claude Code setup guides and the /setup-claude command for any repo",
+  "description": "Install Claude Code setup guides and two slash commands — /setup-claude to scaffold a repo and /code to run a skill-driven end-to-end development workflow",
   "bin": {
     "claude-setup-kit": "./bin/install.js"
   },
