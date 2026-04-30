@@ -7,7 +7,7 @@ description: Entry point for setting up CLAUDE.md, agents, rules, and skills in 
 
 Reference this file whenever asked to create `CLAUDE.md`, agents, rules, or skills in any repo.
 
-> **Also read:** [`claude-setup-workflow.md`](claude-setup-workflow.md) — required companion file covering the end-to-end ticket-to-PR workflow. Read both before proceeding.
+> **Also read:** [`claude-setup-workflow.md`](claude-setup-workflow.md) — required companion file covering the end-to-end intake-to-PR workflow. Read both before proceeding.
 
 ---
 
@@ -19,6 +19,7 @@ Reference this file whenever asked to create `CLAUDE.md`, agents, rules, or skil
 - Agent files reference **directories** (`.claude/rules/`), never specific file paths — they go stale.
 - No stale references — if a file is renamed or split, update every file that pointed to it.
 - `CLAUDE.md` Project References table must list every rule and skill file by name.
+- **Every file you create or regenerate in `.claude/` or `CLAUDE.md` must carry a generated-by marker** (see below).
 
 ---
 
@@ -34,6 +35,41 @@ Reference this file whenever asked to create `CLAUDE.md`, agents, rules, or skil
 
 ---
 
+## Generated File Markers
+
+Every file you write into a target repo's `.claude/` (rules, skills, agents, commands, hooks) and the root `CLAUDE.md` must include a marker that identifies the kit version that created it. This is what makes safe, non-destructive re-runs possible.
+
+**Read the kit's version first:** the installer writes `meta.json` at the root of the guides directory (same folder as this file). Read it to get `version`, `package`, and `installed_at`. Use those values as the `generated_by` and `generated_at` fields.
+
+**For files with YAML frontmatter** (rules, skills, agents, commands, hooks — anything with `---` fences), add these fields alongside `name` and `description`:
+
+```yaml
+---
+name: <file name>
+description: <one-line description>
+generated_by: <package>@<version>
+generated_at: <ISO 8601 timestamp>
+---
+```
+
+**For `CLAUDE.md`** (which does not use YAML frontmatter), add an HTML comment as the very first line, then a blank line, then the normal content:
+
+```markdown
+<!-- generated_by: <package>@<version> generated_at: <ISO 8601 timestamp> -->
+
+# <project name>
+...
+```
+
+**Why these matter:**
+- On re-run, the Update Existing Setup flow reads the markers to tell kit-generated files from user-edited ones. Files with no marker — or with a marker the user has changed — are treated as user content and never overwritten without asking.
+- The version marker lets the flow detect drift: if the installed kit is newer than the marker in a file, that file is a candidate for a refresh.
+- If the user removes or edits a marker, the file is treated as user-owned. That's the opt-out.
+
+**Never write a marker claiming a version the kit didn't actually produce.** Read `meta.json` every time. Do not hard-code.
+
+---
+
 ## Creation Order
 
 Follow this order — each step depends on the previous:
@@ -43,9 +79,10 @@ Follow this order — each step depends on the previous:
 3. Create rule files → see [`claude-setup-rules.md`](claude-setup-rules.md)
 4. Create skill files → see [`claude-setup-skills.md`](claude-setup-skills.md)
 5. Create agent files → see [`claude-setup-agents.md`](claude-setup-agents.md)
-6. Create command files → `.claude/commands/` (see Step 6 below)
-7. Create `CLAUDE.md` last → see [`claude-setup-claude-md.md`](claude-setup-claude-md.md)
-8. Verify (see Step 8 below)
+6. Create slash commands → see [`claude-setup-commands.md`](claude-setup-commands.md)
+7. Configure hooks if team wants automated behaviors → see [`claude-setup-hooks.md`](claude-setup-hooks.md)
+8. Create `CLAUDE.md` last → see [`claude-setup-claude-md.md`](claude-setup-claude-md.md)
+9. Verify (see Step 9 below)
 
 ---
 
@@ -86,17 +123,7 @@ Do not guess — a wrong assumption produces misleading documentation.
 
 ---
 
-## Step 6 — Custom Slash Commands (`.claude/commands/`)
-
-Slash commands are shortcuts for workflows you trigger repeatedly in Claude Code (`/command-name`). Each `.md` file in `.claude/commands/` becomes one command.
-
-**Create a command when:** a workflow is triggered often and has a fixed sequence of steps (e.g. `/review-pr`, `/add-metric`, `/run-checks`). Each command file must have a clear one-line purpose, the exact steps to follow, and be named in `kebab-case`.
-
-**Do not create commands for:** one-off tasks or anything a naturally invoked agent already handles.
-
----
-
-## Step 8 — Verify
+## Step 9 — Verify
 
 ```bash
 # No file exceeds 200 lines
@@ -117,13 +144,19 @@ Fix anything found before finishing.
 
 Whether adding to a partially set up repo or making ongoing updates to a complete one:
 
-1. Read every affected file in full before touching anything
-2. Identify gaps — missing agents, outdated rules, incomplete CLAUDE.md sections
-3. Do not overwrite files wholesale — edit to fill gaps and preserve what is correct
-4. New rule/skill/agent added → update `CLAUDE.md` Project References table
-5. File renamed or split → grep for all references and update them
-6. Always re-run the verify step after any change
-7. If a rule file no longer applies, delete it and remove it from the CLAUDE.md Project References table
+1. Read `meta.json` from the guides directory to learn the **current** kit version
+2. Read every affected file in full before touching anything
+3. For each file in the target repo's `.claude/` and `CLAUDE.md`:
+   - If the file has a `generated_by` marker **matching the current kit version** → safe to refresh the generated content
+   - If the marker is from an **older kit version** → the file is kit-generated but stale. Propose a refresh; ask the user before overwriting
+   - If the marker is **missing or edited** → treat as user-owned. Edit to fill gaps only; do not overwrite
+4. Identify gaps — missing agents, outdated rules, incomplete CLAUDE.md sections
+5. Do not overwrite user-owned files wholesale — edit to fill gaps and preserve what is correct
+6. Every file you create or refresh gets a fresh marker with the current version and timestamp
+7. New rule/skill/agent added → update `CLAUDE.md` Project References table
+8. File renamed or split → grep for all references and update them
+9. Always re-run the verify step after any change
+10. If a rule file no longer applies, delete it and remove it from the CLAUDE.md Project References table
 
 **Triggers for updating:** new major dependency adopted, team agrees on a new pattern, an agent consistently produces wrong output (signals a rule gap), a skill references files that have moved, or a significant refactor changes how a layer is structured.
 

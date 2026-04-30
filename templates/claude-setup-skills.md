@@ -5,9 +5,13 @@ description: How to create skill files in .claude/skills/ when setting up Claude
 
 # Creating Skill Files
 
-Skills = **step-by-step recipes** for the most common repeatable tasks.
+Skills = **step-by-step recipes** Claude can load on demand. Unlike CLAUDE.md (always in context) or rules (loaded per-path), a skill's body only enters context when it's invoked — so long reference material costs almost nothing until needed.
 
 Derive tasks from the repo's domain — think "add a new X", "create a Y", "wire up a Z". Examples: `add-endpoint`, `add-migration`, `add-page`, `add-metric`, `add-handler`.
+
+## Check Superpowers First
+
+Before creating a new skill, check whether a superpowers skill already covers the task. Run `/help` in Claude Code or check `.claude/plugins/` to see what's installed. Common superpowers skills that teams often duplicate unnecessarily: `systematic-debugging`, `test-driven-development`, `brainstorming`, `writing-plans`. If a superpowers skill covers it — don't create a redundant one.
 
 ## What Deserves a Skill
 
@@ -20,30 +24,49 @@ If a task is trivial, one-off, or fully handled by an agent's built-in workflow 
 
 ---
 
-## What Each Skill File Must Include
+## File Location — Directory with `SKILL.md`
+
+Anthropic's current spec: each skill is a **directory** containing a `SKILL.md` entrypoint, not a flat `.md` file.
+
+```
+.claude/skills/
+└── add-endpoint/
+    ├── SKILL.md          # Entrypoint (required)
+    ├── template.ts       # Optional template Claude fills in
+    └── examples/
+        └── sample.ts     # Optional example output
+```
+
+The directory name becomes the slash command (`/add-endpoint`). Supporting files are only loaded when `SKILL.md` references them — keep large reference docs, templates, and scripts in separate files so they don't consume context until needed.
+
+> **Note:** Flat `.claude/commands/*.md` files still work as a legacy form (Anthropic merged commands into skills). Prefer the `SKILL.md` directory format for new skills.
+
+## What Each `SKILL.md` Must Include
 
 1. **Reference file to read first** — the rule or source file that governs this area
 2. **Steps in dependency order** — what to do and in what sequence
 3. **Code snippets** — using this repo's actual patterns, not generic examples
 4. **Verify checklist** — how to confirm the task was done correctly
 
-Split into `[name]-scaffold.md` / `[name]-wiring.md` if over 200 lines.
+Keep `SKILL.md` under 500 lines. Split reference material into sibling files.
+
+Every `SKILL.md` must include the generated-by marker in its frontmatter — see `claude-setup-instructions.md` § Generated File Markers.
 
 ---
 
 ## File Skeleton
 
-Every skill file must start with frontmatter:
-
 ```markdown
 ---
-name: [skill name]
-description: [one-line description of what this skill does]
+name: add-endpoint
+description: Add a new HTTP endpoint — use when the user asks to create an API route, add a handler, or expose a new service operation
+generated_by: [package]@[version]
+generated_at: [ISO 8601 timestamp]
 ---
 
 ## Before Starting
 
-Read: [path to relevant rule or source file]
+Read: `.claude/rules/api.md`
 
 ## Steps
 
@@ -56,6 +79,22 @@ Read: [path to relevant rule or source file]
 - [ ] [check one]
 - [ ] [check two]
 ```
+
+---
+
+## Useful Frontmatter Fields (all optional except `description`)
+
+| Field | When to use |
+|---|---|
+| `description` | Required. Front-load the key trigger phrase — the combined text is truncated at 1,536 characters in Claude's skill listing. |
+| `when_to_use` | Extra trigger phrases (e.g. "user asks to add a route"). Counts toward the 1,536-char cap. |
+| `allowed-tools` | Pre-approve specific tools for this skill (e.g. `Bash(npm run *)`). Skill still follows global permissions for unlisted tools. |
+| `disable-model-invocation: true` | Only the user can run this (`/skill-name`). Use for skills with side effects — deploys, commits, message sends. |
+| `argument-hint` | Autocomplete hint, e.g. `[endpoint-name]`. |
+| `paths` | Glob that limits when Claude auto-loads the skill, e.g. `"src/api/**/*.ts"`. |
+| `context: fork` + `agent` | Run the skill in a subagent (`Explore`, `Plan`, or a custom agent). Skill content becomes the subagent's prompt. |
+
+Use `$ARGUMENTS` in the body for the full argument string, or `$0` / `$1` / `$ARGUMENTS[N]` for positional args.
 
 ---
 

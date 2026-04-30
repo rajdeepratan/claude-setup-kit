@@ -9,6 +9,19 @@ description: How to create CLAUDE.md at the repo root when setting up Claude for
 
 Create this **last** — after all rules, skills, and agents exist — so the references table is accurate.
 
+**Location:** `./CLAUDE.md` (repo root) or `./.claude/CLAUDE.md` — both are valid per Anthropic's spec. Prefer the repo root so humans discover it too.
+
+**Generated-by marker (required).** `CLAUDE.md` does not use YAML frontmatter, so place the marker as an HTML comment on the very first line, followed by a blank line, then the normal content. See `claude-setup-instructions.md` § Generated File Markers for details — read `meta.json` for the version and timestamp.
+
+```markdown
+<!-- generated_by: [package]@[version] generated_at: [ISO 8601 timestamp] -->
+
+# [project name]
+...
+```
+
+**If the repo has `AGENTS.md`:** Claude Code reads `CLAUDE.md`, not `AGENTS.md`. If you want both to share instructions, make `CLAUDE.md` start with `@AGENTS.md` to import it, then add any Claude-specific additions below.
+
 ---
 
 ## Required Sections (in this order)
@@ -26,18 +39,18 @@ Create this **last** — after all rules, skills, and agents exist — so the re
 
 ## Agent Orchestration Table
 
-Maps natural language intent to agent names so Claude routes correctly:
+Maps natural language intent to the right entry point. For whole-task requests, route to a slash command (`/code`, `/quick`, `/investigate`) — the command handles the full workflow. For mid-task intents that arise inside an active workflow, route directly to the agent that owns that step.
 
 ```markdown
 | When the user says... | Invoke |
 |---|---|
-| shares a Jira ticket / "work on [TICKET-ID]" | full workflow (intake → branch → implement → review → push) |
-| "add a feature", "implement", "build" | `developer` or specialist |
-| "fix a bug", "investigate", "debug" | `debugger` |
-| "review", "check the code" | `code-reviewer` |
-| "push", "create a PR", "branch" | `git` |
-| "write tests", "add coverage" | `test-writer` |
-| anything else | `developer` |
+| "investigate", "does this bug exist?", "reproduce this", "root-cause" | `/investigate` |
+| "build", "add a feature", "change X", "fix Y" | `/code` |
+| "small change", "tiny fix", "one-liner" | `/quick` |
+| "review", "check the code" (mid-task) | `code-reviewer` agent |
+| "push", "create a PR", "branch" (mid-task) | `git` agent |
+| "write tests", "add coverage" (mid-task) | `test-writer` agent |
+| anything else | `developer` agent |
 ```
 
 The catch-all row (`anything else → developer`) is **mandatory** and must always be the last row — it ensures every request has a handler even if it doesn't match a specific pattern.
@@ -74,6 +87,21 @@ Never truncate — always move and link.
 
 ---
 
+## Imports with `@path`
+
+CLAUDE.md supports `@path/to/file.md` imports — Claude expands them at session start. Use this to pull in context without inlining it:
+
+```markdown
+See @README.md for project overview and @package.json for available scripts.
+
+## Git workflow
+@.claude/rules/git.md
+```
+
+Relative paths resolve from the file containing the import. Absolute paths work too. Max depth is 5 hops. Useful for monorepos sharing a common rule file, or for pointing at docs that live outside `.claude/`.
+
+---
+
 ## Monorepo — Per-app CLAUDE.md
 
 Each app's `CLAUDE.md` is a complete, self-contained entry point for that app. Its agent orchestration table should only list the app's own specialist agents — **do not re-list `git` and `code-reviewer`**, they are global agents that live at the root and are inherited automatically.
@@ -81,14 +109,15 @@ Each app's `CLAUDE.md` is a complete, self-contained entry point for that app. I
 ```markdown
 | When the user says... | Invoke |
 |---|---|
-| shares a Jira ticket / "work on [TICKET-ID]" | full workflow |
-| "add a feature", "implement", "build" | `frontend-developer` |
-| "fix a bug", "debug" | `debugger` |
-| "write tests" | `test-writer` |
+| "investigate", "reproduce this", "root-cause" | `/investigate` |
+| "build", "add a feature", "change X", "fix Y" | `/code` |
+| "small change", "tiny fix", "one-liner" | `/quick` |
+| "fix a bug", "debug" (mid-task) | `frontend-developer` or `debugger` as appropriate |
+| "write tests" (mid-task) | `test-writer` |
 | anything else | `developer` |
 ```
 
-The root `CLAUDE.md` orchestration table covers `git`, `code-reviewer`, and any cross-app workflows.
+The root `CLAUDE.md` orchestration table covers `git`, `code-reviewer`, and the slash commands. Per-app tables only list specialist agents specific to the app.
 
 ---
 

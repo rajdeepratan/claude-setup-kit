@@ -23,7 +23,7 @@ These exist once at the repo root and are shared across all apps:
 
 Add these based on what the app actually does:
 
-| Ticket / task type | Agent name |
+| Task type | Agent name |
 |---|---|
 | Frontend / UI / components | `frontend-developer` |
 | API / backend / services | `api-builder` |
@@ -50,10 +50,11 @@ CLAUDE.md's orchestration table, the workflow file, and the agent filename must 
 
 1. **One-line role description**
 2. **"Before starting" reading list** — directories to read, not specific files
-3. **Phased workflow** — ordered steps the agent follows
-4. **Code quality checklist** — what it checks before handing off
-5. **When to ask vs decide** — what requires user input vs autonomous action
-6. **Output format** — how the agent communicates results
+3. **Superpowers skills** — which skills to invoke if the superpowers plugin is installed
+4. **Phased workflow** — ordered steps the agent follows
+5. **Code quality checklist** — what it checks before handing off
+6. **When to ask vs decide** — what requires user input vs autonomous action
+7. **Output format** — how the agent communicates results
 
 ---
 
@@ -68,14 +69,31 @@ Reference directories, never specific files — file paths go stale:
 
 ---
 
+## Superpowers Skills Per Agent Type
+
+If superpowers is installed, each agent type must invoke these skills:
+
+| Agent | Skills to invoke |
+|---|---|
+| `developer`, `frontend-developer`, `api-builder` | `superpowers:brainstorming` (new features), `superpowers:writing-plans`, `superpowers:test-driven-development`, `superpowers:verification-before-completion` (before handoff) |
+| `debugger` | `superpowers:systematic-debugging`, `superpowers:verification-before-completion` |
+| `code-reviewer` | `superpowers:requesting-code-review` |
+| `test-writer` | `superpowers:test-driven-development`, `superpowers:verification-before-completion` |
+
+If superpowers is not installed, skip the skill and proceed with the workflow as written.
+
+---
+
 ## File Skeleton
 
-Every agent file must start with frontmatter:
+Every agent file must start with frontmatter, including the generated-by marker (see `claude-setup-instructions.md` § Generated File Markers — read `meta.json` for the version and timestamp):
 
 ```markdown
 ---
 name: [agent name]
 description: [one-line role description]
+generated_by: [package]@[version]
+generated_at: [ISO 8601 timestamp]
 ---
 
 ## Role
@@ -85,6 +103,13 @@ description: [one-line role description]
 ## Before Starting
 
 Read `.claude/rules/` for coding standards and `.claude/skills/` for recipes.
+
+## Skills
+
+If superpowers is installed:
+- [list the relevant superpowers skills for this agent type]
+
+If superpowers is not installed, skip and proceed with the workflow.
 
 ## Workflow
 
