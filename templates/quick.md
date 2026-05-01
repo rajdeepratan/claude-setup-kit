@@ -23,6 +23,8 @@ Small, well-scoped changes where the full `/code` ceremony is overkill: single-f
 
 **Code graph (Graphify) on `/quick`:** skip it. If Graphify is installed and its PreToolUse hook would normally surface a graph summary before Glob/Grep, that's fine — but do not read `GRAPH_REPORT.md` proactively, do not run graph queries, and **do not run the freshness check** described in `claude-setup-graph.md` Runtime section. The overhead (~2–5k tokens, plus ~50 for the freshness check) exceeds the value on tasks small enough to reach for `/quick`.
 
+**`.claude/` coverage check on `/quick`:** also skipped. The coverage check (`claude-setup-coverage.md`) detects when a feature introduces a new domain that needs new agents/rules/`CLAUDE.md` updates. Tasks small enough for `/quick` (typos, copy changes, single-file refactors) don't introduce new domains by definition — running the matrix scan would just be overhead. If the change really does introduce a new domain, that's a signal to restart with `/code`.
+
 ## Entry
 
 Open with: **"What do you want to build, fix, or change? (Lean mode — I'll skip brainstorming and go straight to a short plan.)"**

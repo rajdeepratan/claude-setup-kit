@@ -133,6 +133,24 @@ The check auto-skips on `/quick`, `/code` trivial, and repos without Graphify in
 
 ---
 
+## Auto-coverage check (`.claude/` + `CLAUDE.md`)
+
+When `/code` runs on a non-trivial feature, the kit checks whether the feature introduces a new domain (framework, layer, language, pattern) that `.claude/` doesn't yet cover. If gaps exist — no specialist agent, no scoped rule, no mention in `CLAUDE.md`'s tech stack — the check fires twice:
+
+1. **Phase 2 (proactive)** — before the plan is written, the kit asks: *"This feature introduces [domain X]. `.claude/` is missing [agent / rule / CLAUDE.md update]. Add these to the plan as Phase 2.5 updates so they ship in this PR? (y/n)"* If you accept, the new `.claude/` files are drafted in Phase 5 alongside the feature code.
+2. **Phase 7 (safety net)** — the `code-reviewer` agent re-checks the diff. If gaps remain (you said no at Phase 2, or a new gap surfaced during implementation), it raises a review **note** suggesting an addition before merge or as a follow-up `/setup-claude` run. Note, not a block — the PR can still merge.
+
+**Auto-skipped on:**
+- `/quick` (lean mode — small changes don't introduce new domains by definition)
+- `/code` trivial auto-detect (typos, single-line tweaks)
+- `/investigate` (read-only, no code changes)
+
+**Cost:** ~100–300 tokens per run when no gaps detected; ~300–600 when gaps surface and you decline; ~3–8k extra when you accept and new files are generated as part of the feature. See `claude-setup-coverage.md` for the detection matrix and heuristic.
+
+**Why it matters:** without this, every new domain silently widens the gap between what's in the repo and what `.claude/` knows about. Specialist agents stay generic, rules don't enforce domain conventions, `CLAUDE.md` drifts from reality. Coverage check closes the loop incrementally instead of relying on the user to remember to re-run `/setup-claude`.
+
+---
+
 ## Usage
 
 Once installed, open Claude Code in any repo.
