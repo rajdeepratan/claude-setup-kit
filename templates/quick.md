@@ -21,6 +21,8 @@ Small, well-scoped changes where the full `/code` ceremony is overkill: single-f
 
 `/quick` **does not auto-escalate to `/code`**. If you're unsure, start with `/code` — its fast path already handles trivial tasks without the ceremony.
 
+**Code graph (Graphify) on `/quick`:** skip it. If Graphify is installed and its PreToolUse hook would normally surface a graph summary before Glob/Grep, that's fine — but do not read `GRAPH_REPORT.md` proactively, do not run graph queries. The overhead (~2–5k tokens) exceeds the value on tasks small enough to reach for `/quick`.
+
 ## Entry
 
 Open with: **"What do you want to build, fix, or change? (Lean mode — I'll skip brainstorming and go straight to a short plan.)"**

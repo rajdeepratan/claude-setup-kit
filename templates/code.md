@@ -17,6 +17,8 @@ You MUST follow every phase in order. Do not skip phases. Do not combine phases.
 
 Then begin Phase 1 — the workflow guide handles the auto-classification (trivial vs full) and decides whether `superpowers:brainstorming` applies. Do not invoke brainstorming unconditionally; let Phase 1 make that call.
 
+The same classification also governs Graphify usage when installed: **full flow** consults the code graph (~10–25k tokens saved on real work); **trivial path** skips it (load overhead exceeds value on tiny edits). When announcing the classification to the user (per Phase 1), this is part of what the decision means.
+
 **Mandatory gates** — stop and wait for the user at:
 1. **Phase 3** — plan confirmation
 2. **Phase 4** — branch decision (same / new + base + name)

@@ -27,10 +27,11 @@ This file is loaded by `/investigate`.
 **Superpowers skill (if installed):** `superpowers:systematic-debugging`
 
 1. If superpowers is installed, invoke `superpowers:systematic-debugging`
-2. Reproduce the issue — in code, in a test, or by tracing
-3. Bisect / trace / read the code to find the root cause
-4. **No edits to application code.** Scratch files, temporary test files in a sandboxed location, and logging are fine — but no PR-bound changes
-5. If unable to reproduce, document what was tried and what conclusion was reached (intended behavior / environmental / need more info)
+2. **If a code graph is available** (`GRAPH_REPORT.md` exists at repo root — Graphify is installed), consult it FIRST before grep/glob. Investigation is the scenario the graph is built for — blast radius, call paths, affected surface. The `graphify` PreToolUse hook should surface graph context automatically before any Glob/Grep call; if it doesn't, read `GRAPH_REPORT.md` directly.
+3. Reproduce the issue — in code, in a test, or by tracing
+4. Bisect / trace / read the code to find the root cause
+5. **No edits to application code.** Scratch files, temporary test files in a sandboxed location, and logging are fine — but no PR-bound changes
+6. If unable to reproduce, document what was tried and what conclusion was reached (intended behavior / environmental / need more info)
 
 ---
 

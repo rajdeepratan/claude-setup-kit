@@ -16,6 +16,8 @@ const PLUGINS_CACHE_DIR = path.join(os.homedir(), '.claude', 'plugins', 'cache')
 const GUIDE_FILES = [
   'claude-setup-instructions.md',
   'claude-setup-preflight.md',
+  'claude-setup-graph.md',
+  'claude-setup-graph-summary.md',
   'claude-setup-workflow.md',
   'claude-setup-workflow-investigation.md',
   'claude-setup-workflow-agents.md',

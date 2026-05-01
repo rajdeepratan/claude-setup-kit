@@ -85,6 +85,42 @@ Without it, phases skip their skill invocations (brainstorming, writing-plans, T
 
 If the upstream superpowers project renames a skill, re-run `npx claude-setup-kit` to pull updated guide files.
 
+**Graphify is a second optional integration but is not a preflight check** — it's a one-time setup-time offer inside `/setup-claude`, not re-checked per command. See the Graphify section below.
+
+---
+
+## Optional: Graphify for graph-aware exploration
+
+[Graphify](https://github.com/safishamsi/graphify) is a local AST-level knowledge graph engine. Once indexed against your repo, agents can query the call graph, blast radius, and dependency surface directly instead of grepping raw files.
+
+**When it's offered:** `/setup-claude` detects language fit during exploration — if ≥ 70% of non-trivial source files are in Graphify-supported languages (Python, JS/TS, Go, Rust, Java, C/C++, Ruby, C#, Kotlin, Scala, PHP, Swift, Lua, Zig, PowerShell, Elixir, Objective-C, Julia, Verilog, SystemVerilog, Vue, Svelte, Dart), the command offers to install and index. On YAML / shell / config-only repos it skips silently — no prompt. This is a **setup-time offer, not a per-command preflight** — once installed, Graphify's own PreToolUse hook on Glob/Grep surfaces graph context automatically on every command.
+
+**Ask-first, never auto-install.** Even though every install step is a shell command Claude could run via Bash, the integration shows you the exact four commands before asking — you see what's going onto your machine before authorising anything:
+
+```bash
+uv tool install graphifyy        # or: pipx install graphifyy / pip install graphifyy
+graphify install
+graphify .                       # initial indexing — seconds to minutes depending on repo size
+graphify claude install          # appends CLAUDE.md section + installs the Glob/Grep PreToolUse hook
+```
+
+After the four commands succeed, `/setup-claude` synthesises `graphify-out/SUMMARY.md` automatically — a human-readable (~80-line) interpretation of Graphify's machine-formatted `GRAPH_REPORT.md` (~400 lines), with god nodes, surprising connections marked real or false-positive, plain-language community labels, and CLI query examples. Costs a one-time ~5–15k tokens, no second prompt — your yes to Graphify covers it.
+
+Say `n` and `/setup-claude` skips it silently. On the next Update run it will re-offer.
+
+**Token impact when installed:**
+
+| Command path | Graph used? | Tokens saved per run (typical) |
+|---|---|---|
+| `/code` full flow (real feature, real bug — the default for non-trivial work) | yes | **−10 to −25k** |
+| `/investigate` | yes | **−15 to −30k** (biggest single win — blast radius is exactly what the graph is built for) |
+| `/code` trivial auto-detect (typo, one-line tweak — Claude classifies this automatically) | no | graph skipped — load overhead exceeds value on typo-sized work |
+| `/quick` (you opted into lean mode) | no | graph skipped — same reason |
+
+**Keeping the graph fresh.** After install, run `graphify watch .` in a separate terminal tab so the graph stays in sync with file changes. Without it, the graph goes stale and agents may cite relationships that no longer exist — a correctness risk, not just a token one.
+
+**Upstream notes.** Graphify is pre-1.0 (v0.5.0 as of 2026-04-23). If install commands change upstream, re-run `npx claude-setup-kit` to pull updated guide content. The PyPI package is named `graphifyy` (double-y) — other `graphify*` packages are unaffiliated.
+
 ---
 
 ## Usage
