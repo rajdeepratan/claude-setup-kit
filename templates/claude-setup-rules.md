@@ -23,10 +23,10 @@ Every rule file must cover: where files live, how they are named, what is forbid
 
 Always create a `git.md` rule file containing:
 
-- Branch naming pattern — ask the user for the project's ticket format (e.g. `COB-XXXX` or `PROJ-XXXX-description`)
+- Branch naming pattern — ask the user for the project's preferred format (e.g. `feat/<short-description>`, `fix/<short-description>`)
 - Always ask which branch to create the new branch from before starting any work
 - After the user names the base branch, fetch the latest remote state and check if that branch is behind — if it is, warn the user and ask if they want to pull before branching
-- Commit messages must be clear and descriptive — reference the ticket where relevant
+- Commit messages must be clear and descriptive — reference any related issue where relevant
 - Never commit `.env` files, credentials, API keys, tokens, or secrets
 - If a sensitive file is staged accidentally, remove it and add to `.gitignore` before committing
 
@@ -34,12 +34,14 @@ Always create a `git.md` rule file containing:
 
 ## File Skeleton
 
-Every rule file must start with frontmatter:
+Every rule file must start with frontmatter, including the generated-by marker (see `claude-setup-instructions.md` § Generated File Markers — read `meta.json` for the version and timestamp):
 
 ```markdown
 ---
 name: [concern name]
 description: [one-line description of what this rule covers]
+generated_by: [package]@[version]
+generated_at: [ISO 8601 timestamp]
 ---
 
 [Rule stated plainly]
@@ -59,6 +61,27 @@ Not every rule needs a code example. Location and naming rules can be stated pla
 ```
 
 Only add code examples when the rule covers logic, patterns, or syntax — not when it's a file/folder convention.
+
+---
+
+## Path-Scoped Rules
+
+Rules can be scoped to specific file globs so Claude only loads them when working with matching files. This saves context and prevents rules from polluting unrelated work. Use the `paths` frontmatter field:
+
+```markdown
+---
+name: api
+description: API layer conventions
+paths:
+  - "src/api/**/*.ts"
+  - "src/services/**/*.ts"
+---
+
+- All endpoints must include input validation
+- Use the standard error response format
+```
+
+Rules without a `paths` field load unconditionally at session start (the default). Path-scoped rules trigger only when Claude reads a matching file. Use brace expansion for multiple extensions: `"src/**/*.{ts,tsx}"`.
 
 ---
 
