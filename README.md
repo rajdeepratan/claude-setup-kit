@@ -60,6 +60,7 @@ Every template is frontmatter-validated before any write — a broken guide (mis
 The guide files cover:
 - **Instructions** — golden rules, creation order, file structure, verification
 - **Preflight** — superpowers dependency check that runs before every command does anything else
+- **Graph** — optional Graphify integration: setup-time install offer, runtime freshness check, and the SUMMARY.md synthesis prompt
 - **Workflow** — the ten-phase development loop used by `/code` and `/quick` (plan → confirm → branch → implement → verify → review → push → PR → PR feedback → post-merge cleanup), split across three focused files (base phases, investigation flow, agent selection)
 - **Rules** — how to create rule files for a repo (including path-scoped rules)
 - **Skills** — how to create skills using Anthropic's `SKILL.md` directory format
@@ -104,9 +105,15 @@ graphify .                       # initial indexing — seconds to minutes depen
 graphify claude install          # appends CLAUDE.md section + installs the Glob/Grep PreToolUse hook
 ```
 
-After the four commands succeed, `/setup-claude` synthesises `graphify-out/SUMMARY.md` automatically — a human-readable (~80-line) interpretation of Graphify's machine-formatted `GRAPH_REPORT.md` (~400 lines), with god nodes, surprising connections marked real or false-positive, plain-language community labels, and CLI query examples. Costs a one-time ~5–15k tokens, no second prompt — your yes to Graphify covers it.
+Say `n` and `/setup-claude` skips it silently. Re-run `/setup-claude` later and the offer fires again.
 
-Say `n` and `/setup-claude` skips it silently. On the next Update run it will re-offer.
+**SUMMARY.md auto-synthesis.** After the four commands succeed, `/setup-claude` synthesises `graphify-out/SUMMARY.md` automatically — a human-readable (~80-line) interpretation of Graphify's machine-formatted `GRAPH_REPORT.md` (~400 lines), with god nodes, surprising connections marked real or false-positive, plain-language community labels, and CLI query examples. Costs a one-time ~5–15k tokens, no second prompt — your yes to Graphify covers it.
+
+**Auto-freshness on subsequent runs.** Once Graphify is installed, the kit checks whether the graph is in sync with your recent code changes before each graph-consulting command. The check fires on `/code` full flow, `/investigate`, and `/setup-claude` Update flow.
+
+If the graph is more than 7 days behind your latest source-file commit (or 50+ commits behind), the kit prints a one-line warning and offers to re-run `graphify .` and re-synthesise SUMMARY.md. Decline and the command continues with the stale graph; accept and the kit refreshes both files (no second prompt — your accept covers both).
+
+The check auto-skips on `/quick`, `/code` trivial, and repos without Graphify installed — zero overhead in those cases.
 
 **Token impact when installed:**
 
@@ -117,7 +124,10 @@ Say `n` and `/setup-claude` skips it silently. On the next Update run it will re
 | `/code` trivial auto-detect (typo, one-line tweak — Claude classifies this automatically) | no | graph skipped — load overhead exceeds value on typo-sized work |
 | `/quick` (you opted into lean mode) | no | graph skipped — same reason |
 
-**Keeping the graph fresh.** After install, run `graphify watch .` in a separate terminal tab so the graph stays in sync with file changes. Without it, the graph goes stale and agents may cite relationships that no longer exist — a correctness risk, not just a token one.
+**Keeping the graph fresh.** Two ways:
+
+- **Proactive:** run `graphify watch .` in a separate terminal tab — the graph updates incrementally as files change. Free, continuous, recommended.
+- **Reactive (safety net):** the kit's auto-freshness check above catches stale graphs at the start of any graph-consulting command and offers to refresh. Bounds your staleness window to 7 days / 50 commits if you forget watch.
 
 **Upstream notes.** Graphify is pre-1.0 (v0.5.0 as of 2026-04-23). If install commands change upstream, re-run `npx claude-setup-kit` to pull updated guide content. The PyPI package is named `graphifyy` (double-y) — other `graphify*` packages are unaffiliated.
 

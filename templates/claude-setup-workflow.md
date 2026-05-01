@@ -36,6 +36,7 @@ Every phase with a named superpowers skill MUST invoke that skill via the `Skill
 **Superpowers skill (if installed):** `superpowers:writing-plans`
 
 1. If superpowers is installed, invoke `superpowers:writing-plans` to produce a structured plan
+1a. **Graph freshness** — if `graphify-out/graph.json` is present, run the freshness check from `claude-setup-graph.md` Runtime section before any blast-radius query. Auto-skipped on `/quick` and `/code` trivial.
 2. **Full plan format** (default): cover every section, omitting only those that genuinely do not apply:
    - **Changes** — files/modules to be added, modified, or removed
    - **Affected surface** — public APIs, exported functions, shared interfaces, DB schemas, migrations

@@ -67,5 +67,5 @@ Check whether `.claude/` and `CLAUDE.md` already exist in the repo.
 6. Do not overwrite user-owned files wholesale — edit to fill gaps and preserve what is correct
 7. Every file you create or refresh gets a fresh marker using the current kit version and timestamp from `meta.json`
 8. Update `CLAUDE.md` Project References table to reflect actual state of `.claude/`
-9. **Graphify offer (Update flow)** — if `graphify` is not yet on `PATH` and the repo meets the 70% language-fit threshold, follow `{{INSTALL_PATH}}/claude-setup-graph.md` and offer the install. This re-fires on every Update run for users who declined previously; they can decline again and will be re-offered next time.
+9. **Graphify offer or freshness (Update flow)** — if `graphify` is **not yet** on `PATH` and the repo meets the 70% language-fit threshold, follow `{{INSTALL_PATH}}/claude-setup-graph.md` and offer the install (re-fires on every Update run for users who declined previously). If `graphify` **is** already installed, instead run the freshness check from `claude-setup-graph.md`'s Runtime section — refresh the graph and re-synthesise `graphify-out/SUMMARY.md` if stale.
 10. Run the verify step

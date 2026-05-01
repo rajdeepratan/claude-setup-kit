@@ -95,6 +95,55 @@ The PreToolUse hook Graphify installs handles the default case — agents see gr
 
 ---
 
+## Runtime: Freshness Check (auto)
+
+When a command is about to consult the graph, first verify the graph isn't stale relative to recent code changes. This runs in `/code` full flow, `/investigate`, and `/setup-claude` Update flow. **Skip on `/quick` and `/code` trivial auto-detect** — those paths don't consult the graph anyway.
+
+### Early-exit if no graph
+
+```bash
+[ -f graphify-out/graph.json ] || exit 0
+```
+
+If `graphify-out/graph.json` doesn't exist, Graphify isn't installed in this repo. Exit silently — zero overhead for non-Graphify users.
+
+### Detection (script-level, ~50 tokens)
+
+```bash
+graph_mtime=$(stat -c %Y graphify-out/graph.json 2>/dev/null || stat -f %m graphify-out/graph.json)
+last_src_commit=$(git log -1 --format=%ct -- '*.py' '*.js' '*.ts' '*.tsx' '*.jsx' '*.go' '*.rs' '*.java' '*.rb' '*.cs' '*.kt' '*.scala' '*.php' '*.swift' '*.cpp' '*.c' '*.h')
+commits_since_index=$(git log --oneline --since="@${graph_mtime}" -- '*.py' '*.js' '*.ts' '*.tsx' '*.jsx' '*.go' '*.rs' '*.java' '*.rb' '*.cs' '*.kt' '*.scala' '*.php' '*.swift' '*.cpp' '*.c' '*.h' | wc -l)
+```
+
+**Stale criteria** (any one triggers):
+
+- `last_src_commit > graph_mtime + 7 days` (7 * 86400 seconds)
+- `commits_since_index >= 50`
+
+If neither condition holds, the graph is fresh — pass silently.
+
+### On stale: warn + offer (does not auto-run)
+
+Print exactly:
+
+> *"Graph is N days behind the latest source commit (M commits since last index). Re-run `graphify .` to refresh? (y/n) — declining is fine; the graph will still answer questions but may cite relationships that have changed."*
+
+- **On yes:** run `graphify .` via Bash. Same "show command then run" discipline — the user has already seen what runs because the command is in the prompt. After it succeeds, **re-synthesise SUMMARY.md** by re-following `claude-setup-graph-summary.md` (no second prompt — same authorisation as the install-time SUMMARY.md write).
+- **On no:** proceed with the stale graph. Do not warn again in this command — the user has seen and decided.
+
+### Cost summary
+
+| State | Tokens added per command |
+|---|---|
+| No graph installed | 0 (early exit) |
+| Graph fresh | ~50 (silent stat + git log + comparison) |
+| Graph stale, declined | ~200–500 (warning + y/n flow) |
+| Graph stale, accepted | ~50 + wall-clock for `graphify .` + ~5–15k SUMMARY.md re-synthesis |
+
+Steady-state cost on a healthy repo (graph fresh, watch running): negligible. Big costs only fire when an actual refresh is needed.
+
+---
+
 ## Caveats
 
 - **Stale-graph correctness risk.** A graph that's 2 weeks old in an actively-refactored repo will make Claude cite relationships that no longer exist. `graphify watch` is not optional — it's the mitigation. Tell the user this explicitly.

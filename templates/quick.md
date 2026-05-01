@@ -21,7 +21,7 @@ Small, well-scoped changes where the full `/code` ceremony is overkill: single-f
 
 `/quick` **does not auto-escalate to `/code`**. If you're unsure, start with `/code` — its fast path already handles trivial tasks without the ceremony.
 
-**Code graph (Graphify) on `/quick`:** skip it. If Graphify is installed and its PreToolUse hook would normally surface a graph summary before Glob/Grep, that's fine — but do not read `GRAPH_REPORT.md` proactively, do not run graph queries. The overhead (~2–5k tokens) exceeds the value on tasks small enough to reach for `/quick`.
+**Code graph (Graphify) on `/quick`:** skip it. If Graphify is installed and its PreToolUse hook would normally surface a graph summary before Glob/Grep, that's fine — but do not read `GRAPH_REPORT.md` proactively, do not run graph queries, and **do not run the freshness check** described in `claude-setup-graph.md` Runtime section. The overhead (~2–5k tokens, plus ~50 for the freshness check) exceeds the value on tasks small enough to reach for `/quick`.
 
 ## Entry
 
