@@ -232,3 +232,9 @@ npx claude-setup-kit
 - Marker missing or edited → treated as user-owned; edits to fill gaps only, never overwritten
 
 Remove or edit the marker on any file you want the kit to leave alone.
+
+---
+
+## License
+
+[MIT](LICENSE) © Rajdeep Ratan
